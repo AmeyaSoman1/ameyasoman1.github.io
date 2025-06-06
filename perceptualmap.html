@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Perceptual Map</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+
+    #map {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      border: 2px solid #333;
+      margin: auto;
+      background: #fff;
+    }
+
+    /* Cross (axes) */
+    #map::before,
+    #map::after {
+      content: "";
+      position: absolute;
+      background: #333;
+    }
+
+    #map::before {
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      transform: translateY(-50%);
+    }
+
+    #map::after {
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      transform: translateX(-50%);
+    }
+
+    .label {
+      position: absolute;
+      padding: 5px 10px;
+      background: #3498db;
+      color: #fff;
+      border-radius: 4px;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .axis-label {
+      position: absolute;
+      font-weight: bold;
+      background: #f0f0f0;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .top-axis {
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .bottom-axis {
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-axis {
+      top: 50%;
+      left: -100px;
+      transform: translateY(-50%);
+    }
+
+    .right-axis {
+      top: 50%;
+      right: -100px;
+      transform: translateY(-50%);
+    }
+
+    input[type="text"] {
+      padding: 5px;
+      margin: 5px;
+    }
+
+    button {
+      padding: 5px 10px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Editable Title -->
+<h2 contenteditable="true" style="border-bottom: 2px dashed #aaa; display: inline-block; padding: 5px;">Perceptual Map Title (Click to Edit)</h2>
+
+<br><br>
+
+<!-- Add Label Controls -->
+<input type="text" id="labelInput" placeholder="Enter label">
+<button onclick="addLabel()">Add Label</button>
+
+<br><br>
+
+<!-- Map with Axes Labels -->
+<div style="position: relative; display: inline-block;">
+  <div id="map">
+    <div class="axis-label top-axis" contenteditable="true">High Quality</div>
+    <div class="axis-label bottom-axis" contenteditable="true">Low Quality</div>
+    <div class="axis-label left-axis" contenteditable="true">Low Price</div>
+    <div class="axis-label right-axis" contenteditable="true">High Price</div>
+  </div>
+</div>
+
+<script>
+let draggingLabel = null;
+let offsetX = 0;
+let offsetY = 0;
+
+function addLabel() {
+  const map = document.getElementById('map');
+  const text = document.getElementById('labelInput').value.trim();
+  if (text === '') return;
+
+  const div = document.createElement('div');
+  div.className = 'label';
+  div.innerText = text;
+  div.style.left = '290px';
+  div.style.top = '290px';
+
+  // Add drag events
+  div.addEventListener('mousedown', (e) => {
+    draggingLabel = div;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    div.style.cursor = 'grabbing';
+  });
+
+  map.appendChild(div);
+  document.getElementById('labelInput').value = '';
+}
+
+// Global mousemove and mouseup
+document.addEventListener('mousemove', (e) => {
+  if (draggingLabel) {
+    const map = document.getElementById('map');
+    const rect = map.getBoundingClientRect();
+
+    let x = e.clientX - rect.left - offsetX;
+    let y = e.clientY - rect.top - offsetY;
+
+    // Boundaries
+    x = Math.max(0, Math.min(x, map.clientWidth - draggingLabel.offsetWidth));
+    y = Math.max(0, Math.min(y, map.clientHeight - draggingLabel.offsetHeight));
+
+    draggingLabel.style.left = x + 'px';
+    draggingLabel.style.top = y + 'px';
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  if (draggingLabel) {
+    draggingLabel.style.cursor = 'grab';
+    draggingLabel = null;
+  }
+});
+</script>
+
+</body>
+</html>
